@@ -24,9 +24,10 @@ import org.springframework.stereotype.Component;
  * <a href="http://christianposta.com/blog>http://christianposta.com/blog</a>.
  */
 @Component
-public class SimpeRoute extends RouteBuilder{
+public class IngressRouteBuilder extends RouteBuilder{
     @Override
     public void configure() throws Exception {
-        from("timer:direct").log("foo bar");
+        from("file:target/managed/incoming").log("received a new file for processing ${file:name}")
+            .to("file:target/process/foo").setBody().header("CamelFileNameProduced").to("amq:incoming.orders");
     }
 }

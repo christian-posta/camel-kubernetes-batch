@@ -16,9 +16,14 @@
  */
 package org.jboss.fuse.examples;
 
+import io.fabric8.kubernetes.client.Config;
+import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.mq.camel.AMQComponent;
 import io.fabric8.mq.core.MQConnectionFactory;
 import org.apache.camel.spring.javaconfig.CamelConfiguration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +42,16 @@ public class SpringConfig extends CamelConfiguration {
         rc.setServiceName("broker");
         rc.setConnectionFactory(new MQConnectionFactory("admin", "admin"));
         return rc;
+    }
+
+    @Bean
+    public KubernetesJobManfiestCreator kubeJobManifest(){
+        return new KubernetesJobManfiestCreator();
+    }
+
+    @Bean KubernetesClient kubernetesClient(@Value("#{environment['KUBERNETES_MASTER']}")String masterUrl){
+        Config config = new ConfigBuilder().withMasterUrl(masterUrl).build();
+        return new DefaultKubernetesClient(config);
     }
 
 }

@@ -14,29 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.fuse.examples;
+package org.jboss.fuse.examples.route;
 
-import io.fabric8.mq.camel.AMQComponent;
-import io.fabric8.mq.core.MQConnectionFactory;
-import org.apache.camel.spring.javaconfig.CamelConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.apache.camel.builder.RouteBuilder;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by ceposta 
  * <a href="http://christianposta.com/blog>http://christianposta.com/blog</a>.
  */
-@Configuration
-@ComponentScan(basePackages = "org.jboss.fuse.examples.route")
-public class SpringConfig extends CamelConfiguration {
-
-    @Bean
-    public AMQComponent amq() {
-        AMQComponent rc = new AMQComponent();
-        rc.setServiceName("broker");
-        rc.setConnectionFactory(new MQConnectionFactory("admin", "admin"));
-        return rc;
+@Component
+public class SchedulerRouteBuilder extends RouteBuilder {
+    @Override
+    public void configure() throws Exception {
+        from("amq:incoming.orders").log("have a new job to schedule for job ${body}")
+                .to("bean:kubeJobManifest").log("kube manifest: ${body}");
     }
-
 }

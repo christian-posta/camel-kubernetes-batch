@@ -10,11 +10,13 @@
   <modules>
     <module>file-ingress-events</module>
     <module>file-backend-job</module>
+    <module>file-ingress-job-scheduler</module>
   </modules>
   <packaging>pom</packaging>
 
   <properties>
-    <fabric8.version>2.2.0.redhat-079</fabric8.version>
+    <!--<fabric8.version>2.2.0.redhat-079</fabric8.version>-->
+    <fabric8.version>2.2.89</fabric8.version>
     <fuse.version>6.2.1.redhat-084</fuse.version>
     <camel-version>2.15.1.redhat-621084</camel-version>
     <activemq-version>5.11.0.redhat-621084</activemq-version>
@@ -47,6 +49,10 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.fabric8.mq</groupId>
+      <artifactId>camel-amq</artifactId>
     </dependency>
   </dependencies>
 
