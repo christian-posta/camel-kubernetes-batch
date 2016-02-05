@@ -19,6 +19,8 @@ package org.jboss.fuse.examples;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Job;
 import io.fabric8.kubernetes.api.model.extensions.JobBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -26,6 +28,8 @@ import org.apache.camel.Body;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,15 +47,16 @@ public class KubernetesJobManfiestCreator {
     public String generateKubernetesJobManifest(@Body String fileLocation) {
         String kubeJson = null;
         try {
-            kubeJson = MAPPER.writeValueAsString(createJob());
-//            kubernetesClient.extensions().jobs().create()
+            Job kubeJob = createJob(fileLocation);
+            kubeJson = MAPPER.writeValueAsString(kubeJob);
+//            kubernetesClient.extensions().jobs().create(kubeJob);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }
         return kubeJson;
     }
 
-    private Job createJob() {
+    private Job createJob(String fileLocation) {
         JobBuilder builder = new JobBuilder();
         builder.withNewMetadata().withName("job1").endMetadata()
                 .withNewSpec()
@@ -68,6 +73,7 @@ public class KubernetesJobManfiestCreator {
                             .withName("jobcontainer")
                             .withImage("image/foo")
                             .withCommand("fooc0mmand")
+                                .withEnv(getJobEnvironmentVariables(fileLocation))
                         .endContainer()
                         .withRestartPolicy("Never")
                     .endSpec()
@@ -81,5 +87,12 @@ public class KubernetesJobManfiestCreator {
         HashMap<String, String> map = new HashMap<>();
         map.put("job", "job11");
         return map;
+    }
+
+    public List<EnvVar> getJobEnvironmentVariables(String fileLocation) {
+        LinkedList<EnvVar> rc = new LinkedList<>();
+        rc.add(new EnvVarBuilder().withName("FILE_NAME").withValue(fileLocation).build());
+        return rc;
+
     }
 }
