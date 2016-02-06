@@ -28,6 +28,6 @@ public class SchedulerRouteBuilder extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         from("amq:incoming.orders").log("have a new job to schedule for job ${body}")
-                .to("bean:kubeJobManifest").log("kube manifest: ${body}");
+                .to("bean:kubernetesJobSubmitter").log("kube manifest: ${body}");
     }
 }

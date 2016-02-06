@@ -45,11 +45,12 @@ public class SpringConfig extends CamelConfiguration {
     }
 
     @Bean
-    public KubernetesJobManfiestCreator kubeJobManifest(){
-        return new KubernetesJobManfiestCreator();
+    public KubernetesJobSubmitter kubernetesJobSubmitter(){
+        return new KubernetesJobSubmitter();
     }
 
     @Bean KubernetesClient kubernetesClient(@Value("#{environment['KUBERNETES_MASTER']}")String masterUrl){
+        System.out.println("using KUBE_MASTER: " + masterUrl);
         Config config = new ConfigBuilder().withMasterUrl(masterUrl).build();
         return new DefaultKubernetesClient(config);
     }

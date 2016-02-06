@@ -19,80 +19,40 @@ package org.jboss.fuse.examples;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Job;
-import io.fabric8.kubernetes.api.model.extensions.JobBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.apache.camel.Body;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Created by ceposta 
  * <a href="http://christianposta.com/blog>http://christianposta.com/blog</a>.
  */
-public class KubernetesJobManfiestCreator {
+public class KubernetesJobSubmitter {
 
     private static final ObjectMapper MAPPER = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     @Autowired
     private KubernetesClient kubernetesClient;
+
     private Map<String, String> jobLabels;
 
     public String generateKubernetesJobManifest(@Body String fileLocation) {
         String kubeJson = null;
         try {
-            Job kubeJob = createJob(fileLocation);
+            KubernetesJobManifestCreator manifestCreator = new KubernetesJobManifestCreator(fileLocation);
+            Job kubeJob = manifestCreator.createJob();
             kubeJson = MAPPER.writeValueAsString(kubeJob);
-//            kubernetesClient.extensions().jobs().create(kubeJob);
+            kubernetesClient.extensions().jobs().create(kubeJob);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }
         return kubeJson;
     }
 
-    private Job createJob(String fileLocation) {
-        JobBuilder builder = new JobBuilder();
-        builder.withNewMetadata().withName("job1").endMetadata()
-                .withNewSpec()
-                    .withNewSelector()
-                        .withMatchLabels(getJobLabels())
-                    .endSelector()
-                    .withNewTemplate()
-                        .withNewMetadata()
-                        .withName("job#1")
-                        .withLabels(getJobLabels())
-                    .endMetadata()
-                    .withNewSpec()
-                        .addNewContainer()
-                            .withName("jobcontainer")
-                            .withImage("image/foo")
-                            .withCommand("fooc0mmand")
-                                .withEnv(getJobEnvironmentVariables(fileLocation))
-                        .endContainer()
-                        .withRestartPolicy("Never")
-                    .endSpec()
-                    .endTemplate()
-                .endSpec();
 
-        return builder.build();
-    }
 
-    public Map<String,String> getJobLabels() {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("job", "job11");
-        return map;
-    }
 
-    public List<EnvVar> getJobEnvironmentVariables(String fileLocation) {
-        LinkedList<EnvVar> rc = new LinkedList<>();
-        rc.add(new EnvVarBuilder().withName("FILE_NAME").withValue(fileLocation).build());
-        return rc;
-
-    }
 }
