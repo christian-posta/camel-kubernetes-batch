@@ -16,8 +16,7 @@
  */
 package org.jboss.fuse.examples;
 
-import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.EnvVarBuilder;
+import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.extensions.Job;
 import io.fabric8.kubernetes.api.model.extensions.JobBuilder;
 
@@ -33,6 +32,10 @@ import java.util.Map;
  */
 public class KubernetesJobManifestCreator {
 
+
+    private static final String PROJECT_NAME="camel-kubernetes-batch";
+    public static final String COMPONENT_NAME = "file-backend-job";
+
     private final String fileLocation;
     private final String filePath;
     private final String fileName;
@@ -46,31 +49,70 @@ public class KubernetesJobManifestCreator {
         System.out.println("file path: '" + filePath + "' file name: '" + fileName + "'");
     }
 
-    public Job createJob() {
-        JobBuilder builder = new JobBuilder();
-        return builder.withNewMetadata()
-                    .withName("file-backend-job")
-                .endMetadata()
-                    .withNewSpec()
-                        .withNewSelector()
-                        .withMatchLabels(getJobLabels())
-                    .endSelector()
-                    .withNewTemplate()
-                        .withNewMetadata()
-                            .withName("file-backend-job")
-                            .withLabels(getJobLabels())
-                        .endMetadata()
-                        .withNewSpec()
-                            .addNewContainer()
-                                .withName("file-backend-job")
-                                .withImage("fabric8/file-backend-job:1.0-SNAPSHOT")
-                                .withEnv(getJobEnvironmentVariables(fileLocation))
-                            .endContainer()
-                            .withRestartPolicy("Never")
-                        .endSpec()
-                    .endTemplate()
-                    .endSpec().build();
+    public KubernetesList createJob() {
 
+        return new KubernetesListBuilder()
+                .withNewMetadata()
+                .endMetadata()
+                .addNewPersistentVolumeClaimItem()
+                .withNewMetadata()
+                .withName("backend-job-pvc")
+                .addToLabels("provider", "fabric8")
+                .addToLabels("project", PROJECT_NAME)
+                .addToLabels("component", COMPONENT_NAME)
+                .addToLabels("group", PROJECT_NAME)
+                .endMetadata()
+                .withNewSpec()
+                .withAccessModes("ReadWriteOnce")
+                .withResources(getResourceRequirement())
+                .endSpec()
+                .endPersistentVolumeClaimItem()
+                .addNewJobItem()
+                    .withNewMetadata()
+                        .withName("file-backend-job")
+                    .endMetadata()
+                .withNewSpec()
+                .withNewSelector()
+                .withMatchLabels(getJobLabels())
+                .endSelector()
+                .withNewTemplate()
+                .withNewMetadata()
+                .withName("file-backend-job")
+                .withLabels(getJobLabels())
+                .endMetadata()
+                .withNewSpec()
+                .addNewContainer()
+                .withName("file-backend-job")
+                .withImage("fabric8/file-backend-job:1.0-SNAPSHOT")
+                .withEnv(getJobEnvironmentVariables(fileLocation))
+                .withVolumeMounts(new VolumeMount("/deployments/camel/incoming", "backend-job-volume", false))
+                .endContainer()
+                .withVolumes(
+                        new VolumeBuilder().withName("backend-job-volume")
+                        .withPersistentVolumeClaim(getPersistentVolumeClaimSource())
+                        .build()
+                )
+                .withRestartPolicy("Never")
+                .endSpec()
+                .endTemplate().endSpec()
+                .endJobItem()
+                .build();
+
+    }
+
+    private PersistentVolumeClaimVolumeSource getPersistentVolumeClaimSource() {
+        PersistentVolumeClaimVolumeSource rc = new PersistentVolumeClaimVolumeSource("backend-job-pvc", false);
+        return rc;
+    }
+
+    private ResourceRequirements getResourceRequirement() {
+        ResourceRequirements rc = new ResourceRequirements();
+
+        Quantity claimSize = new Quantity("100Ki");
+        HashMap<String, Quantity> requests = new HashMap<>();
+        requests.put("storage", claimSize);
+        rc.setRequests(requests);
+        return rc;
     }
 
     public Map<String,String> getJobLabels() {
@@ -81,8 +123,8 @@ public class KubernetesJobManifestCreator {
 
     public List<EnvVar> getJobEnvironmentVariables(String fileLocation) {
         LinkedList<EnvVar> rc = new LinkedList<>();
-        rc.add(new EnvVarBuilder().withName("FILE_NAME").withValue(fileName).build());
-        rc.add(new EnvVarBuilder().withName("FILE_PATH").withValue(filePath).build());
+        rc.add(new EnvVarBuilder().withName("JOB_FILE_NAME").withValue(fileName).build());
+        rc.add(new EnvVarBuilder().withName("JOB_FILE_PATH").withValue(filePath).build());
         return rc;
 
     }

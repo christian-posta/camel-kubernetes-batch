@@ -30,7 +30,14 @@
     <fabric8.iconRef>camel</fabric8.iconRef>
 
     <!-- create environment variables for kubernetes.json-->
-    <fabric8.env.FILE_PATH>/opt/camel</fabric8.env.FILE_PATH>
-    <fabric8.env.FILE_NAME></fabric8.env.FILE_NAME>
+    <fabric8.env.JOB_FILE_PATH/>
+    <fabric8.env.JOB_FILE_NAME/>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.fabric8</groupId>
+      <artifactId>kubernetes-generator</artifactId>
+    </dependency>
+  </dependencies>
 </project>

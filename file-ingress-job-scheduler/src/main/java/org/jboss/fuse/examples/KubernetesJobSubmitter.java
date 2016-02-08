@@ -19,6 +19,7 @@ package org.jboss.fuse.examples;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.extensions.Job;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.apache.camel.Body;
@@ -43,7 +44,7 @@ public class KubernetesJobSubmitter {
         String kubeJson = null;
         try {
             KubernetesJobManifestCreator manifestCreator = new KubernetesJobManifestCreator(fileLocation);
-            Job kubeJob = manifestCreator.createJob();
+            KubernetesList kubeJob = manifestCreator.createJob();
             kubeJson = MAPPER.writeValueAsString(kubeJob);
             System.out.println(kubeJson);
 //            kubernetesClient.extensions().jobs().create(kubeJob);

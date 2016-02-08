@@ -28,12 +28,20 @@
     <fabric8.label.container>java</fabric8.label.container>
     <fabric8.label.group>camel-kubernetes-batch</fabric8.label.group>
     <fabric8.iconRef>camel</fabric8.iconRef>
+
+    <!-- create environment variables for kubernetes.json-->
+    <fabric8.env.INCOMING_FILE_PATH/>
+    <fabric8.env.OUTGOING_FILE_PATH/>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-spring-javaconfig</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.fabric8</groupId>
+      <artifactId>kubernetes-generator</artifactId>
     </dependency>
   </dependencies>
 </project>
