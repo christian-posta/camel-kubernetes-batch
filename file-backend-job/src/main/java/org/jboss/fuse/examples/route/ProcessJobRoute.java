@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 public class ProcessJobRoute extends RouteBuilder {
     @Override
     public void configure() throws Exception {
-        from("file:{{env:FILE_PATH}}?fileName={{env:FILE_NAME}}")
+        from("file:{{env:JOB_FILE_PATH}}?fileName={{env:JOB_FILE_NAME}}")
                 .log("processing file... ${body}");
     }
 }

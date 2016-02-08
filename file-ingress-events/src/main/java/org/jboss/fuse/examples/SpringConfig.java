@@ -18,6 +18,7 @@ package org.jboss.fuse.examples;
 
 import io.fabric8.mq.camel.AMQComponent;
 import io.fabric8.mq.core.MQConnectionFactory;
+import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.spring.javaconfig.CamelConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -36,6 +37,12 @@ public class SpringConfig extends CamelConfiguration {
         AMQComponent rc = new AMQComponent();
         rc.setServiceName("broker");
         rc.setConnectionFactory(new MQConnectionFactory("admin", "admin"));
+        return rc;
+    }
+
+    @Bean
+    public PropertiesComponent properties() {
+        PropertiesComponent rc = new PropertiesComponent();
         return rc;
     }
 

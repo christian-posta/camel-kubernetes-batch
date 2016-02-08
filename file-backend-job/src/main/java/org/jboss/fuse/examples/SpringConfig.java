@@ -43,7 +43,6 @@ public class SpringConfig extends CamelConfiguration {
     @Bean
     public PropertiesComponent properties() {
         PropertiesComponent rc = new PropertiesComponent();
-        rc.setLocation("classpath:/camel.properties");
         return rc;
     }
 

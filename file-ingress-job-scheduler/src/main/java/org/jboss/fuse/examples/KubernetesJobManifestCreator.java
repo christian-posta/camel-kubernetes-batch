@@ -69,7 +69,7 @@ public class KubernetesJobManifestCreator {
                             .withRestartPolicy("Never")
                         .endSpec()
                     .endTemplate()
-                    .endSpec().build()
+                    .endSpec().build();
 
     }
 

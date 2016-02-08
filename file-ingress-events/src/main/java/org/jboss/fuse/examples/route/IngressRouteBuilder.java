@@ -31,7 +31,7 @@ import java.io.File;
 public class IngressRouteBuilder extends RouteBuilder{
     @Override
     public void configure() throws Exception {
-        from("file:target/managed/incoming").log("received a new file for processing ${file:name}")
-            .to("file:target/process/foo").setBody().header("CamelFileNameProduced").to("amq:incoming.orders");
+        from("file:{{env:INCOMING_FILE_PATH}}").log("received a new file for processing ${file:name}")
+            .to("file:{{env:OUTGOING_FILE_PATH}}").setBody().header("CamelFileNameProduced").to("amq:incoming.orders");
     }
 }
