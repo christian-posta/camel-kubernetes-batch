@@ -11,6 +11,25 @@
 
   <artifactId>file-ingress-job-scheduler</artifactId>
 
+  <properties>
+    <fabric8.service.name>${project.artifactId}</fabric8.service.name>
+    <fabric8.service.headless>true</fabric8.service.headless>
+
+    <fabric8.metrics.scrape>true</fabric8.metrics.scrape>
+    <fabric8.metrics.port>9779</fabric8.metrics.port>
+    <!-- End Prometheus metrics stuff -->
+
+    <fabric8.generateJson>true</fabric8.generateJson>
+
+    <!-- don't need openshift routes for this file services, will use volumes-->
+    <fabric8.apply.createRoutes>false</fabric8.apply.createRoutes>
+
+    <fabric8.label.component>${project.artifactId}</fabric8.label.component>
+    <fabric8.label.container>java</fabric8.label.container>
+    <fabric8.label.group>camel-kubernetes-batch</fabric8.label.group>
+    <fabric8.iconRef>camel</fabric8.iconRef>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>io.fabric8</groupId>

@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Job;
 import io.fabric8.kubernetes.api.model.extensions.JobBuilder;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,36 +34,43 @@ import java.util.Map;
 public class KubernetesJobManifestCreator {
 
     private final String fileLocation;
+    private final String filePath;
+    private final String fileName;
 
     public KubernetesJobManifestCreator(String fileLocation) {
         this.fileLocation = fileLocation;
+        String sep = File.separator;
+        int chop = fileLocation.lastIndexOf(sep);
+        filePath = fileLocation.substring(0, chop);
+        fileName = fileLocation.substring(chop + 1, fileLocation.length());
+        System.out.println("file path: '" + filePath + "' file name: '" + fileName + "'");
     }
 
     public Job createJob() {
         JobBuilder builder = new JobBuilder();
-        builder.withNewMetadata().withName("job1").endMetadata()
-                .withNewSpec()
-                .withNewSelector()
-                .withMatchLabels(getJobLabels())
-                .endSelector()
-                .withNewTemplate()
-                .withNewMetadata()
-                .withName("job1")
-                .withLabels(getJobLabels())
+        return builder.withNewMetadata()
+                    .withName("file-backend-job")
                 .endMetadata()
-                .withNewSpec()
-                .addNewContainer()
-                .withName("jobcontainer")
-                .withImage("image/foo")
-                .withCommand("fooc0mmand")
-                .withEnv(getJobEnvironmentVariables(fileLocation))
-                .endContainer()
-                .withRestartPolicy("Never")
-                .endSpec()
-                .endTemplate()
-                .endSpec();
+                    .withNewSpec()
+                        .withNewSelector()
+                        .withMatchLabels(getJobLabels())
+                    .endSelector()
+                    .withNewTemplate()
+                        .withNewMetadata()
+                            .withName("file-backend-job")
+                            .withLabels(getJobLabels())
+                        .endMetadata()
+                        .withNewSpec()
+                            .addNewContainer()
+                                .withName("file-backend-job")
+                                .withImage("fabric8/file-backend-job:1.0-SNAPSHOT")
+                                .withEnv(getJobEnvironmentVariables(fileLocation))
+                            .endContainer()
+                            .withRestartPolicy("Never")
+                        .endSpec()
+                    .endTemplate()
+                    .endSpec().build()
 
-        return builder.build();
     }
 
     public Map<String,String> getJobLabels() {
@@ -73,7 +81,8 @@ public class KubernetesJobManifestCreator {
 
     public List<EnvVar> getJobEnvironmentVariables(String fileLocation) {
         LinkedList<EnvVar> rc = new LinkedList<>();
-        rc.add(new EnvVarBuilder().withName("FILE_NAME").withValue(fileLocation).build());
+        rc.add(new EnvVarBuilder().withName("FILE_NAME").withValue(fileName).build());
+        rc.add(new EnvVarBuilder().withName("FILE_PATH").withValue(filePath).build());
         return rc;
 
     }

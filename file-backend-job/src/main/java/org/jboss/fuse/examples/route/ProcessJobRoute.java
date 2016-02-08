@@ -14,29 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.fuse.examples;
+package org.jboss.fuse.examples.route;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.component.properties.PropertiesComponent;
-import org.apache.camel.spring.javaconfig.CamelConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.apache.camel.builder.RouteBuilder;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by ceposta 
  * <a href="http://christianposta.com/blog>http://christianposta.com/blog</a>.
  */
-@Configuration
-@ComponentScan(basePackages = "org.jboss.fuse.examples.route")
-public class SpringConfig extends CamelConfiguration {
-
-    @Bean
-    public PropertiesComponent properties() {
-        PropertiesComponent rc = new PropertiesComponent();
-        rc.setLocation("classpath:/camel.properties");
-//        context.addComponent("properties", rc);
-        return rc;
+@Component
+public class ProcessJobRoute extends RouteBuilder {
+    @Override
+    public void configure() throws Exception {
+        from("file:{{env:FILE_PATH}}?fileName={{env:FILE_NAME}}")
+                .log("processing file... ${body}");
     }
-
 }

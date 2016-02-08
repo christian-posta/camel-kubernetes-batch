@@ -45,7 +45,8 @@ public class KubernetesJobSubmitter {
             KubernetesJobManifestCreator manifestCreator = new KubernetesJobManifestCreator(fileLocation);
             Job kubeJob = manifestCreator.createJob();
             kubeJson = MAPPER.writeValueAsString(kubeJob);
-            kubernetesClient.extensions().jobs().create(kubeJob);
+            System.out.println(kubeJson);
+//            kubernetesClient.extensions().jobs().create(kubeJob);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }

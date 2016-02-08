@@ -21,6 +21,8 @@
     <camel-version>2.15.1.redhat-621084</camel-version>
     <activemq-version>5.11.0.redhat-621084</activemq-version>
 
+    <jvm.mainClass>org.apache.camel.spring.javaconfig.Main</jvm.mainClass>
+
     <!-- Common docker maven plugin configs -->
     <fabric8.dockerUser>fabric8/</fabric8.dockerUser>
     <docker.image>${fabric8.dockerUser}${project.artifactId}:${project.version}</docker.image>
@@ -78,7 +80,7 @@
               <goal>build</goal>
             </goals>
             <configuration>
-              <javaMainClass>org.apache.camel.spring.javaconfig.Main</javaMainClass>
+              <javaMainClass>${jvm.mainClass}</javaMainClass>
               <source>${basedir}/src/main/fabric8</source>
             </configuration>
           </execution>
@@ -95,6 +97,51 @@
             <argument>-basedPackages</argument>
             <argument>org.jboss.fuse.examples</argument>
           </arguments>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>fabric8-maven-plugin</artifactId>
+        <version>${fabric8.version}</version>
+        <executions>
+          <execution>
+            <id>json</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>json</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>attach</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jolokia</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>${docker.maven.plugin.version}</version>
+        <configuration>
+          <images>
+            <image>
+              <name>${docker.image}</name>
+              <build>
+                <from>${docker.from}</from>
+                <assembly>
+                  <basedir>/deployments</basedir>
+                  <user>root:root:root</user>
+                  <descriptorRef>hawt-app</descriptorRef>
+                </assembly>
+                <env>
+                  <JAVA_LIB_DIR>/deployments/lib</JAVA_LIB_DIR>
+                  <JAVA_MAIN_CLASS>${jvm.mainClass}</JAVA_MAIN_CLASS>
+                </env>
+              </build>
+            </image>
+          </images>
         </configuration>
       </plugin>
     </plugins>
