@@ -61,7 +61,7 @@ public class SpringConfig extends CamelConfiguration {
                     Executors.newSingleThreadExecutor().execute(new Runnable() {
                         @Override
                         public void run() {
-                            System.exit(1);
+                            System.exit(0);
                         }
                     });
                 }
