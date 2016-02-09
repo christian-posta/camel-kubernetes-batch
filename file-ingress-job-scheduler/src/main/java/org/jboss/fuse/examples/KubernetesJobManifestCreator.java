@@ -17,8 +17,6 @@
 package org.jboss.fuse.examples;
 
 import io.fabric8.kubernetes.api.model.*;
-import io.fabric8.kubernetes.api.model.extensions.Job;
-import io.fabric8.kubernetes.api.model.extensions.JobBuilder;
 
 import java.io.File;
 import java.util.HashMap;
