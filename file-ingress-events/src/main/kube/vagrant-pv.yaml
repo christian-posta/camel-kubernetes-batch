@@ -1,7 +1,7 @@
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: rider-auto-file-pv
+  name: file-ingress-events-pv
   labels:
     type: local
 spec:
