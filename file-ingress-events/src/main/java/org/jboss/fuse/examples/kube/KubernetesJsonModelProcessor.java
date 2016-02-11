@@ -30,55 +30,46 @@ import java.util.HashMap;
 @KubernetesModelProcessor
 public class KubernetesJsonModelProcessor {
 
-    private static final String PROJECT_NAME="camel-kubernetes-batch";
-    public static final String COMPONENT_NAME = "file-ingress-events";
 
-
-    public void withPersistentVolumeClaim(TemplateBuilder builder){
-        builder.addNewPersistentVolumeClaimObject()
-                .withNewMetadata()
-                    .withName("ingress-events-pvc")
-                    .addToLabels("provider", "fabric8")
-                    .addToLabels("project", PROJECT_NAME)
-                    .addToLabels("component", COMPONENT_NAME)
-                    .addToLabels("group", PROJECT_NAME)
-                .endMetadata()
-                .withNewSpec()
-                    .withAccessModes("ReadWriteOnce")
-                .withResources(getResourceRequirement())
-                .endSpec()
-            .endPersistentVolumeClaimObject().build();
+    /**
+     * Augment the containers to refer to the volumes
+     * @param builder
+     */
+    @Named("file-ingress-events")
+    public void withVolumeMounts(ContainerBuilder builder) {
+        builder.withVolumeMounts(
+                new VolumeMount("/deployments/camel/incoming", "file-ingress-events-incoming-volume", false),
+                new VolumeMount("/deployments/camel/outgoing", "file-ingress-events-outgoing-volume", false))
+                .build();
     }
 
-    private ResourceRequirements getResourceRequirement() {
-        ResourceRequirements rc = new ResourceRequirements();
-
-        Quantity claimSize = new Quantity("100Ki");
-        HashMap<String, Quantity> requests = new HashMap<>();
-        requests.put("storage", claimSize);
-        rc.setRequests(requests);
-        return rc;
-    }
-
+    /**
+     * Augment the pod template to create volumes
+     * @param builder
+     */
     public void withPodTemplate(PodTemplateSpecBuilder builder) {
         builder.withSpec(builder.getSpec()).editSpec()
                 .addNewVolume()
-                    .withName("ingress-events-volume")
-                    .withPersistentVolumeClaim(getPersistentVolumeClaimSource())
+                    .withName("file-ingress-events-incoming-volume")
+                    .withHostPath(getIncomingCamelDir())
+                .endVolume()
+                .addNewVolume()
+                    .withName("file-ingress-events-outgoing-volume")
+                    .withHostPath(getOutgoingCamelDir())
                 .endVolume()
                 .endSpec().build();
     }
 
-    private PersistentVolumeClaimVolumeSource getPersistentVolumeClaimSource() {
-        PersistentVolumeClaimVolumeSource rc = new PersistentVolumeClaimVolumeSource("ingress-events-pvc", false);
+    private HostPathVolumeSource getIncomingCamelDir() {
+        HostPathVolumeSource rc = new HostPathVolumeSource("/opt/camel/incoming");
         return rc;
     }
 
-    @Named("file-ingress-events")
-    public void withVolumeMounts(ContainerBuilder builder) {
-        builder.withVolumeMounts(new VolumeMount("/deployments/camel/incoming", "ingress-events-volume", false),
-                new VolumeMount("/deployments/camel/outgoing", "ingress-events-volume", false))
-                .build();
+    private HostPathVolumeSource getOutgoingCamelDir() {
+        HostPathVolumeSource rc = new HostPathVolumeSource("/opt/camel/outgoing");
+        return rc;
     }
+
+
 
 }
