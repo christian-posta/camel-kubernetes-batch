@@ -17,6 +17,8 @@
 package org.jboss.fuse.examples;
 
 import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.api.model.extensions.Job;
+import io.fabric8.kubernetes.api.model.extensions.JobBuilder;
 
 import java.io.File;
 import java.util.HashMap;
@@ -52,27 +54,22 @@ public class KubernetesJobManifestCreator {
         return new KubernetesListBuilder()
                 .withNewMetadata()
                 .endMetadata()
-                .addNewPersistentVolumeClaimItem()
-                    .withNewMetadata()
-                        .withName("backend-job-pvc")
-                        .addToLabels("provider", "fabric8")
-                        .addToLabels("project", PROJECT_NAME)
-                        .addToLabels("component", COMPONENT_NAME)
-                        .addToLabels("group", PROJECT_NAME)
-                    .endMetadata()
-                    .withNewSpec()
-                        .withAccessModes("ReadWriteOnce")
-                        .withResources(getResourceRequirement())
-                        .endSpec()
-                .endPersistentVolumeClaimItem()
-                .addNewJobItem()
-                    .withNewMetadata()
-                        .withName("file-backend-job")
-                    .endMetadata()
-                    .withNewSpec()
-                        .withNewSelector()
-                            .withMatchLabels(getJobLabels())
-                        .endSelector()
+                .addNewJobItemLike(getSpecificJob())
+                .endJobItem()
+                .build();
+
+    }
+
+
+
+    public Job getSpecificJob(){
+        return new JobBuilder().withNewMetadata()
+                    .withName("file-backend-job")
+                .endMetadata()
+                .withNewSpec()
+                    .withNewSelector()
+                        .withMatchLabels(getJobLabels())
+                    .endSelector()
                     .withCompletions(1)
                     .withParallelism(1)
                     .withNewTemplate()
@@ -88,32 +85,18 @@ public class KubernetesJobManifestCreator {
                                 .withVolumeMounts(new VolumeMount("/deployments/camel/outgoing", "backend-job-volume", false))
                             .endContainer()
                             .withVolumes(new VolumeBuilder().withName("backend-job-volume")
-                                            .withPersistentVolumeClaim(getPersistentVolumeClaimSource())
-                                            .build()
-                            )
-                            .withRestartPolicy("Never")
+                                    .withHostPath(getOutgoingCamelDir()).build())
+                        .withRestartPolicy("Never")
                         .endSpec()
                     .endTemplate()
-                    .endSpec()
-                .endJobItem()
-                .build();
-
+                .endSpec().build();
     }
 
-    private PersistentVolumeClaimVolumeSource getPersistentVolumeClaimSource() {
-        PersistentVolumeClaimVolumeSource rc = new PersistentVolumeClaimVolumeSource("backend-job-pvc", false);
+    private HostPathVolumeSource getOutgoingCamelDir() {
+        HostPathVolumeSource rc = new HostPathVolumeSource("/opt/camel/outgoing");
         return rc;
     }
 
-    private ResourceRequirements getResourceRequirement() {
-        ResourceRequirements rc = new ResourceRequirements();
-
-        Quantity claimSize = new Quantity("100Ki");
-        HashMap<String, Quantity> requests = new HashMap<>();
-        requests.put("storage", claimSize);
-        rc.setRequests(requests);
-        return rc;
-    }
 
     public Map<String,String> getJobLabels() {
         HashMap<String, String> map = new HashMap<>();

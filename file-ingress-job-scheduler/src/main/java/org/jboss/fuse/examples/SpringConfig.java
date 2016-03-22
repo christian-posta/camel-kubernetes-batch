@@ -16,14 +16,11 @@
  */
 package org.jboss.fuse.examples;
 
-import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.mq.camel.AMQComponent;
 import io.fabric8.mq.core.MQConnectionFactory;
 import org.apache.camel.spring.javaconfig.CamelConfiguration;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -39,8 +36,9 @@ public class SpringConfig extends CamelConfiguration {
     @Bean
     public AMQComponent amq() {
         AMQComponent rc = new AMQComponent();
-        rc.setServiceName("broker");
-        rc.setConnectionFactory(new MQConnectionFactory("admin", "admin"));
+        MQConnectionFactory factory = new MQConnectionFactory("admin", "admin");
+        factory.setServiceName("broker");
+        rc.setConnectionFactory(factory);
         return rc;
     }
 
@@ -49,10 +47,20 @@ public class SpringConfig extends CamelConfiguration {
         return new KubernetesJobSubmitter();
     }
 
-    @Bean KubernetesClient kubernetesClient(@Value("#{environment['KUBERNETES_MASTER']}")String masterUrl){
+    /*@Bean KubernetesClient kubernetesClient(@Value("#{environment['KUBERNETES_MASTER']}")String masterUrl){
         System.out.println("using KUBE_MASTER: " + masterUrl);
         Config config = new ConfigBuilder().withMasterUrl(masterUrl).build();
         return new DefaultKubernetesClient(config);
+    }*/
+
+
+    /**
+     * Let's let the client find the default master url and configs
+     * .. in a kube cluster that will be kubernetes.default.svc
+     * @return
+     */
+    @Bean KubernetesClient kubernetesClient(){
+        return new DefaultKubernetesClient();
     }
 
 }

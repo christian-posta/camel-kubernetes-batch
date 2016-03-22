@@ -12,7 +12,8 @@
   <artifactId>file-ingress-job-scheduler</artifactId>
 
   <properties>
-    <fabric8.service.name>${project.artifactId}</fabric8.service.name>
+    <!--  service name needs to be at most 24 char-->
+    <fabric8.service.name>file-job-scheduler</fabric8.service.name>
     <fabric8.service.headless>true</fabric8.service.headless>
 
     <fabric8.metrics.scrape>true</fabric8.metrics.scrape>
@@ -28,6 +29,9 @@
     <fabric8.label.container>java</fabric8.label.container>
     <fabric8.label.group>camel-kubernetes-batch</fabric8.label.group>
     <fabric8.iconRef>camel</fabric8.iconRef>
+
+    <fabric8.serviceAccount>camel-batch</fabric8.serviceAccount>
+    <fabric8.env.JAVA_ENABLE_DEBUG>false</fabric8.env.JAVA_ENABLE_DEBUG>
   </properties>
 
   <dependencies>

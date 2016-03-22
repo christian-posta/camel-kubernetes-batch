@@ -23,6 +23,8 @@ import org.jboss.fuse.examples.KubernetesJobManifestCreator;
 /**
  * Created by ceposta 
  * <a href="http://christianposta.com/blog>http://christianposta.com/blog</a>.
+ *
+ * Sample class that outputs what the KubernetsJobManifestCreator creates
  */
 public class KubeJobJsonCreator {
 
