@@ -35,8 +35,9 @@ public class SpringConfig extends CamelConfiguration {
     @Bean
     public AMQComponent amq() {
         AMQComponent rc = new AMQComponent();
-        rc.setServiceName("broker");
-        rc.setConnectionFactory(new MQConnectionFactory("admin", "admin"));
+        MQConnectionFactory factory = new MQConnectionFactory("admin", "admin");
+        factory.setServiceName("broker");
+        rc.setConnectionFactory(factory);
         return rc;
     }
 

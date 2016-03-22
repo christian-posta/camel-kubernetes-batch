@@ -19,6 +19,8 @@
     <fabric8.metrics.port>9779</fabric8.metrics.port>
     <!-- End Prometheus metrics stuff -->
 
+    <docker.port.container.jvm-debug>5005</docker.port.container.jvm-debug>
+
     <fabric8.generateJson>true</fabric8.generateJson>
 
     <!-- don't need openshift routes for this file services, will use volumes-->
@@ -30,8 +32,9 @@
     <fabric8.iconRef>camel</fabric8.iconRef>
 
     <!-- create environment variables for kubernetes.json-->
-    <fabric8.env.INCOMING_FILE_PATH/>
-    <fabric8.env.OUTGOING_FILE_PATH/>
+    <fabric8.env.INCOMING_FILE_PATH>/deployments/camel/incoming</fabric8.env.INCOMING_FILE_PATH>
+    <fabric8.env.OUTGOING_FILE_PATH>/deployments/camel/outgoing</fabric8.env.OUTGOING_FILE_PATH>
+    <fabric8.env.JAVA_ENABLE_DEBUG>false</fabric8.env.JAVA_ENABLE_DEBUG>
   </properties>
 
   <dependencies>
